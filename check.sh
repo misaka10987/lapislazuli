@@ -2,7 +2,7 @@
 set -e
 
 main() {
-    g++ -std=c++23 -Wall -fsyntax-only $1
+    clang++ -std=c++23 -Wall -fsyntax-only $1
     set +e
     g++ -std=c++17 -o /dev/null $1 >/dev/null 2>/dev/null
     local succ=$?

@@ -146,13 +146,13 @@ namespace ll {
         friend constexpr std::ostream& operator<<(std::ostream& output, Grid map) noexcept {
             return output << "(" << map.x << ", " << map.y << ")";
         }
-        constexpr std::vector<bool>::reference done() const noexcept {
+        inline std::vector<bool>::reference done() const noexcept {
             return DONE[this->y * WIDTH + this->x];
         }
         constexpr std::vector<Grid> neighbor() const noexcept {
             return { this->dy(1), this->dx(1), this->dx(-1), this->dy(-1) };
         }
-        constexpr void walk(std::function<bool(Grid)> cond, std::function<void(Grid)> then) const noexcept {
+        inline void walk(std::function<bool(Grid)> cond, std::function<void(Grid)> then) const noexcept {
             if (!this->valid()) return;
             if (this->done()) return;
             if (!cond(*this)) return;
@@ -167,12 +167,12 @@ namespace ll {
             this->walk(cond, then);
             return ans;
         }
-        static constexpr Grid next(T const& pat) noexcept {
+        static inline Grid next(T const& pat) noexcept {
             for (auto y : rng(HEIGHT)) for (auto x : rng(WIDTH))
                 if (MAP[x][y] == pat && !Grid(x, y).done()) return Grid(x, y);
             return Grid();
         }
-        static constexpr int stat(T const& pat) noexcept {
+        static inline int stat(T const& pat) noexcept {
             int ans = 0;
             for (auto y : rng(HEIGHT)) for (auto x : rng(WIDTH))
                 if (MAP[x][y] == pat) ans++;
