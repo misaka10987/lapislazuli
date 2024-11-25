@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <functional>
 #include <iostream>
 
@@ -11,49 +12,37 @@ namespace ll {
 /// @return the result of factorial
 ///
 /// The behavior is undefined unless `n>0`.
-constexpr int fact(int n) noexcept { return n == 0 ? 1 : n * fact(n - 1); }
+constexpr int32_t fact(int32_t n) noexcept {
+    return n == 0 ? 1 : n * fact(n - 1);
+}
 
 /// @brief Iterator for base-n digits of an integer.
 /// @note The order of which digits come from the iterator is reverse from how
 /// they are written, i.e. the last digit will be the **first** element from the
 /// iterator.
-///
-/// # Example
-///
-/// ```cpp
-///
-/// for (auto i : ll::BaseN(8, 123)) std::cout << i; // 371
-///
-/// ```
-class BaseN final {
+template <int32_t N, typename T = int32_t> class BaseN final {
   public:
-    /// @brief Base of numeric.
-    int const base;
     /// @brief The number to convert into digits.
-    int const num;
-    constexpr BaseN(int base, int num) noexcept : base(base), num(num) {}
+    int32_t const num;
+    constexpr BaseN(int32_t num) noexcept : num(num) {}
     class Iterator final {
-        int const base;
-        int curr;
+        int32_t curr;
 
       public:
-        constexpr Iterator(int base, int curr) noexcept
-            : base(base), curr(curr) {}
-        constexpr int operator*() const noexcept {
-            return this->curr % this->base;
-        }
+        constexpr Iterator(int32_t curr) noexcept : curr(curr) {}
+        constexpr int32_t operator*() const noexcept { return this->curr % N; }
         constexpr Iterator& operator++() noexcept {
-            this->curr /= base;
+            this->curr /= N;
             return *this;
         }
         constexpr bool operator!=(Iterator const& rhs) const noexcept {
             return this->curr != rhs.curr;
         }
     };
-    constexpr Iterator begin() const noexcept { return Iterator(base, num); }
-    constexpr Iterator end() const noexcept { return Iterator(base, 0); }
-    inline operator std::vector<int>() const noexcept {
-        auto res = std::vector<int>();
+    constexpr Iterator begin() const noexcept { return Iterator(num); }
+    constexpr Iterator end() const noexcept { return Iterator(0); }
+    inline operator std::vector<int32_t>() const noexcept {
+        auto res = std::vector<int32_t>();
         for (auto i : *this)
             res.push_back(i);
         return res;
@@ -84,7 +73,7 @@ constexpr void panic() noexcept { panic(""); }
 /// for (auto i : Range(0, n)) f(i); // instead, you could write this
 ///
 /// ```
-template <typename T = int> class Range final {
+template <typename T = int32_t> class Range final {
     /// @brief Left hand side of the range. Closed.
     T const left;
     /// @brief Right hand side of the range. Open.
@@ -148,31 +137,31 @@ template <typename T> constexpr Range<T> rng(T term) noexcept {
 /// } // 514 541 154 145 451 415
 ///
 /// ```
-class Permut final {
+template <typename T = int32_t> class Permut final {
   public:
     /// @brief Elements of the permutation.
-    std::vector<int> const el;
-    constexpr Permut(std::vector<int> el) noexcept : el(el) {}
-    constexpr int cnt() const noexcept { return fact(el.size()); }
+    std::vector<T> const el;
+    constexpr Permut(std::vector<T> el) noexcept : el(el) {}
+    constexpr int32_t cnt() const noexcept { return fact(el.size()); }
     class Iterator final {
       public:
-        std::vector<int> const& el;
+        std::vector<T> const& el;
 
       private:
-        std::vector<int> curr;
-        std::vector<int> buf;
+        std::vector<uintptr_t> curr;
+        std::vector<T> buf;
         bool next = true;
 
       public:
-        constexpr Iterator(std::vector<int> const& el)
-            : el(el), curr(std::vector<int>(el.size())),
-              buf(std::vector<int>(el.size())) {
+        constexpr Iterator(std::vector<T> const& el)
+            : el(el), curr(std::vector<uintptr_t>(el.size())),
+              buf(std::vector<T>(el.size())) {
             for (auto i : rng(el.size())) {
                 this->curr[i] = i;
                 this->buf[i] = el[curr[i]];
             }
         }
-        constexpr std::vector<int> const& operator*() const noexcept {
+        constexpr std::vector<T> const& operator*() const noexcept {
             return this->buf;
         }
         constexpr Iterator& operator++() noexcept {
@@ -194,18 +183,18 @@ class Permut final {
 // template<int W = 1024, int H = 1024>
 class Grid final {
   private:
-    static constexpr int W = 1024, H = 1024;
+    static constexpr uintptr_t W = 1024, H = 1024;
     using T = char;
     static inline T MAP[W][H];
     static inline std::vector<bool> DONE = std::vector(W * H, false);
 
   public:
-    static inline int WIDTH = W, HEIGHT = H;
+    static inline uintptr_t WIDTH = W, HEIGHT = H;
 
     /// @brief Set the width and height of the grid.
     /// @param width width, or the first index of array
     /// @param height height, or the second index of array
-    static constexpr void set(int width, int height) noexcept {
+    static constexpr void set(uintptr_t width, uintptr_t height) noexcept {
         WIDTH = width;
         HEIGHT = height;
     }
@@ -249,10 +238,10 @@ class Grid final {
     }
 
     /// @brief x-coordinate of the cell.
-    int const x;
+    uintptr_t const x;
 
     /// @brief y-coordinate of the cell.
-    int const y;
+    uintptr_t const y;
 
     /// @brief Create an always-invalid cell.
     constexpr Grid() noexcept : x(-1), y(-1) {}
@@ -260,19 +249,19 @@ class Grid final {
     /// @brief Create a cell with specified coordinates.
     /// @param x x-coordinate of the cell
     /// @param y y-coordinate of the cell
-    constexpr Grid(int x, int y) noexcept : x(x), y(y) {}
+    constexpr Grid(uintptr_t x, uintptr_t y) noexcept : x(x), y(y) {}
 
     /// @brief Calculate new `Grid` with difference `dx` in x coordinate.
     /// @param dx difference in x
     /// @return the translated cell
-    constexpr Grid dx(int dx) const noexcept {
+    constexpr Grid dx(intptr_t dx) const noexcept {
         return Grid(this->x + dx, this->y);
     }
 
     /// @brief Calculate new `Grid` with difference `dy` in y coordinate.
     /// @param dy difference in y
     /// @return the translated cell
-    constexpr Grid dy(int dy) const noexcept {
+    constexpr Grid dy(intptr_t dy) const noexcept {
         return Grid(this->x, this->y + dy);
     }
 
@@ -300,7 +289,7 @@ class Grid final {
     /// @return `output` for chaining
     friend constexpr std::ostream& operator<<(std::ostream& output,
                                               Grid cell) noexcept {
-        return output << "(" << cell.x << ", " << cell.y << ")";
+        return output << "(" << cell.x << "," << cell.y << ")";
     }
 
     /// @brief Flag that indicates whether a cell has been processed.
@@ -341,8 +330,8 @@ class Grid final {
 
     /// @brief Connected area from this cell.
     /// @return size of area
-    constexpr int conn_area() const noexcept {
-        int ans = 0;
+    constexpr uint64_t conn_area() const noexcept {
+        uint64_t ans = 0;
         auto cond = [&](Grid map) { return map.tile() == this->tile(); };
         auto then = [&](auto) { ans++; };
         this->walk(cond, then);
@@ -363,8 +352,8 @@ class Grid final {
     /// @brief Count how many `pat`s is there in `Grid`.
     /// @param pat the pattern to count
     /// @return number of cells
-    static inline int stat(T const& pat) noexcept {
-        int ans = 0;
+    static inline uint64_t stat(T const& pat) noexcept {
+        uint64_t ans = 0;
         for (auto y : rng(HEIGHT))
             for (auto x : rng(WIDTH))
                 if (MAP[x][y] == pat)
