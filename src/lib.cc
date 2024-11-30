@@ -1,11 +1,18 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <deque>
 #include <functional>
 #include <iostream>
+#include <istream>
+#include <ostream>
+#include <string>
+#include <vector>
 
 /// @brief LapisLazuli is a collection of utilities for OI.
 namespace ll {
+
+typedef __int128_t int128_t;
 
 /// @brief Compute factorial for integer.
 /// @param n a positive integer to compute factorial for
@@ -361,5 +368,49 @@ class Grid final {
         return ans;
     }
 };
+
+/**
+ * @brief Read a value from the specified <code>istream</code>.
+ *
+ * @tparam T type of the value read
+ * @param from stream to read from
+ * @return the value read
+ */
+template <typename T> T input(std::istream& from = std::cin) {
+    T buf;
+    std::cin >> buf;
+    return buf;
+}
+
+template <> int128_t input(std::istream& from) {
+    auto buf = std::string();
+    std::cin >> buf;
+    int128_t ans = 0;
+    for (uintptr_t i = 0; i < buf.size(); i++) {
+        int128_t digit = buf[buf.size() - 1 - i] - '0';
+        for (auto j : rng(i))
+            digit *= 10;
+        ans += digit;
+    }
+    return ans;
+}
+
+/**
+ * @brief Format a 128-bit integer.
+ *
+ * @param value the integer
+ * @return formatted string
+ */
+std::string printed(int128_t value) {
+    auto buf = std::deque<char>();
+    if (value == 0)
+        buf.push_front('0');
+    else
+        for (; value > 0; value /= 10)
+            buf.push_front('0' + value % 10);
+    if (value < 0)
+        buf.push_front('-');
+    return std::string(buf.begin(), buf.end());
+}
 
 } // namespace ll
